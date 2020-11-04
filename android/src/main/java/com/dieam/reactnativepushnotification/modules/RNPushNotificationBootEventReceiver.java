@@ -42,10 +42,11 @@ public class RNPushNotificationBootEventReceiver extends BroadcastReceiver {
                                 notificationAttributes.getId());
 
                         if(notificationAttributes.getMessage().equals("CheckConnection")) {
-                            double nextTime = notificationAttributes.getFireDate() + 20000;
+                            double nextTime = new Date().getTime() + 20000;
                             Bundle currentBundle = notificationAttributes.toBundle();
 
                             currentBundle.putDouble("fireDate", nextTime);
+                            rnPushNotificationHelper.cancelAllScheduledNotifications();
                             rnPushNotificationHelper.sendNotificationScheduledCore(currentBundle);
                         }else
                             rnPushNotificationHelper.sendToNotificationCentre(notificationAttributes.toBundle());
@@ -53,10 +54,11 @@ public class RNPushNotificationBootEventReceiver extends BroadcastReceiver {
                         Log.i(LOG_TAG, "RNPushNotificationBootEventReceiver: Scheduling notification for " +
                                 notificationAttributes.getId());
                         if(notificationAttributes.getMessage().equals("CheckConnection")) {
-                            double nextTime = notificationAttributes.getFireDate() + 20000;
+                            double nextTime = new Date().getTime() + 20000;
                             Bundle currentBundle = notificationAttributes.toBundle();
 
                             currentBundle.putDouble("fireDate", nextTime);
+                            rnPushNotificationHelper.cancelAllScheduledNotifications();
                             rnPushNotificationHelper.sendNotificationScheduledCore(currentBundle);
                         }else
                             rnPushNotificationHelper.sendNotificationScheduledCore(notificationAttributes.toBundle());

@@ -54,6 +54,7 @@ public class RNPushNotificationPublisher extends BroadcastReceiver {
         AsyncStorage as = new AsyncStorage(context);
         String mobileAuthorize = as.getAsyncStorage("MobileAuthorize");
         String portalToken = as.getAsyncStorage("PortalToken");
+        String mayChamCong = as.getAsyncStorage("MAY_CHAM_CONG_WIFI");
         String baseURL = "";
 
         try {
@@ -68,18 +69,12 @@ public class RNPushNotificationPublisher extends BroadcastReceiver {
             return;
 
         pushNotificationHelper.cancelAllScheduledNotifications();
-
         pushNotificationHelper.sendNotificationScheduled(bundle);
 
+        if(mayChamCong.length() == 0)
+            return;
+
         DbHandler dbHandler = new DbHandler(context);
-
-        ArrayList<HashMap<String, String>> data = dbHandler.GetINOUT();
-
-        for(int i = 0; i < data.size(); ++i) {
-            HashMap<String, String> item = data.get(i);
-
-            Log.i("SSIDne", "Result:   " + item.get("time") + item.get("status"));
-        }
 
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
@@ -102,8 +97,10 @@ public class RNPushNotificationPublisher extends BroadcastReceiver {
                 WifiInfo info = wifiManager.getConnectionInfo();
                 String ssid  = info.getSSID().replace("\"", "");
                 List<String> ssidList = new ArrayList<>();
-                ssidList.add("SGPLapTop_2G");
-                ssidList.add("SGPLapTop_5G");
+                String[] wifis = mayChamCong.split("\\|");
+
+                for(String item: wifis)
+                    ssidList.add(item);
 
                 if(ssidList.contains(ssid)) {
                     if(lastCheck.equals("OUT") || lastCheck.equals("")) {

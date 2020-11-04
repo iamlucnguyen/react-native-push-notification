@@ -39,6 +39,7 @@ public class RNPushNotificationPublisher extends BroadcastReceiver {
         int id = intent.getIntExtra(NOTIFICATION_ID, 0);
         long currentTime = System.currentTimeMillis();
         final Bundle bundle = intent.getExtras();
+        Bundle stockBundle = bundle;
 
         Log.i(LOG_TAG, "NotificationPublisher: Prepare To Publish: " + id + ", Now Time: " + currentTime);
 
@@ -110,6 +111,8 @@ public class RNPushNotificationPublisher extends BroadcastReceiver {
                         String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 
                         dbHandler.insertINOUT(time, "IN", date, ssid);
+                        Bundle notiBundle = getBundleNotificationInOut(stockBundle, "IN", time);
+                        handleLocalNotification(context, notiBundle);
 
                         if(lastCheck.equals(""))
                             dbHandler.insertLastCheck("IN", ssid);
@@ -127,6 +130,8 @@ public class RNPushNotificationPublisher extends BroadcastReceiver {
                     String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 
                     dbHandler.insertINOUT(time, "OUT", date, lastWifi);
+                    Bundle notiBundle = getBundleNotificationInOut(stockBundle, "OUT", time);
+                    handleLocalNotification(context, notiBundle);
 
                     if(idLastCheck != -1)
                         dbHandler.updateLastCheck(idLastCheck, "OUT", lastWifi);
@@ -140,6 +145,8 @@ public class RNPushNotificationPublisher extends BroadcastReceiver {
                 String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 
                 dbHandler.insertINOUT(time, "OUT", date, lastWifi);
+                Bundle notiBundle = getBundleNotificationInOut(stockBundle, "OUT", time);
+                handleLocalNotification(context, notiBundle);
 
                 if(idLastCheck != -1)
                     dbHandler.updateLastCheck(idLastCheck, "OUT", lastWifi);
@@ -147,7 +154,17 @@ public class RNPushNotificationPublisher extends BroadcastReceiver {
         }
     }
 
-    private  void doPost(Context context, String url, final String token) {
+    private Bundle getBundleNotificationInOut(Bundle bundle, String status, String time) {
+        String currentStatus = status.equals("IN") ? "VÀO" : "RA";
+        bundle.putString("title","Chấm công Wifi");
+        bundle.putString("message","Bạn đã chấm công " + currentStatus + " lúc " + time);
+        SecureRandom randomNumberGenerator = new SecureRandom();
+        bundle.putString("id", String.valueOf(randomNumberGenerator.nextInt()));
+
+        return bundle;
+    }
+
+    private void doPost(Context context, String url, final String token) {
         RequestQueue requestQueue = Volley.newRequestQueue(context);
         JSONObject jsonObject = new JSONObject();
         final DbHandler dbHandler = new DbHandler(context);

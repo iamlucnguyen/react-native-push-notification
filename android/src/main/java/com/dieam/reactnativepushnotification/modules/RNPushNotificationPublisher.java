@@ -46,6 +46,7 @@ public class RNPushNotificationPublisher extends BroadcastReceiver {
         //Check storage luc logout, neu ok moi goi
         Application applicationContext = (Application) context.getApplicationContext();
         RNPushNotificationHelper pushNotificationHelper = new RNPushNotificationHelper(applicationContext);
+        DbHandler dbHandler = new DbHandler(context);
 
         Log.v(LOG_TAG, "onMessageReceived: " + bundle);
 
@@ -65,16 +66,17 @@ public class RNPushNotificationPublisher extends BroadcastReceiver {
             Log.e("My App", "Could not parse malformed JSON");
         }
 
-        if(portalToken.length() == 0)
+        if(portalToken.length() == 0){
+            dbHandler.deleteData();
+
             return;
+        }
 
         pushNotificationHelper.cancelAllScheduledNotifications();
         pushNotificationHelper.sendNotificationScheduled(bundle);
 
         if(mayChamCong.length() == 0)
             return;
-
-        DbHandler dbHandler = new DbHandler(context);
 
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
@@ -96,13 +98,15 @@ public class RNPushNotificationPublisher extends BroadcastReceiver {
                 WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
                 WifiInfo info = wifiManager.getConnectionInfo();
                 String ssid  = info.getSSID().replace("\"", "");
+                String bssid  = info.getBSSID().replace("\"", "");
+                String identifyWifi = ssid + "::" + bssid.toLowerCase();
                 List<String> ssidList = new ArrayList<>();
                 String[] wifis = mayChamCong.split("\\|");
 
                 for(String item: wifis)
                     ssidList.add(item);
 
-                if(ssidList.contains(ssid)) {
+                if(ssidList.contains(identifyWifi)) {
                     if(lastCheck.equals("OUT") || lastCheck.equals("")) {
                         String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
                         String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());

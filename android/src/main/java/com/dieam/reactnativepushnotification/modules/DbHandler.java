@@ -43,6 +43,13 @@ public class DbHandler extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    void deleteData() {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.execSQL("DELETE FROM LastCheck");
+        db.execSQL("DELETE FROM inouttable");
+    }
+
     void insertINOUT(String time, String status, String date, String type){
         //Get the Data Repository in write mode
         SQLiteDatabase db = this.getWritableDatabase();
